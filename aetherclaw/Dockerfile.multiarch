@@ -1,0 +1,60 @@
+# syntax=docker/dockerfile:1
+FROM --platform=$BUILDPLATFORM rust:1.75-alpine AS builder
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETARCH
+
+RUN apk add --no-cache \
+    musl-dev \
+    pkgconfig \
+    openssl-dev \
+    git \
+    clang \
+    lld
+
+WORKDIR /app
+
+# Cache dependencies
+COPY Cargo.toml Cargo.lock ./
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN cargo fetch
+
+# Build application
+COPY src ./src
+COPY src/web/static ./src/web/static
+
+ENV RUSTFLAGS="-C target-feature=+crt-static -C linker=clang -C link-arg=-fuse-ld=lld"
+ENV CARGO_PROFILE_RELEASE_LTO=true
+ENV CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1
+ENV CARGO_PROFILE_RELEASE_OPT_LEVEL=z
+ENV CARGO_PROFILE_RELEASE_PANIC=abort
+
+RUN case "$TARGETARCH" in \
+    amd64) export TARGET="x86_64-unknown-linux-musl" ;; \
+    arm64) export TARGET="aarch64-unknown-linux-musl" ;; \
+    riscv64) export TARGET="riscv64gc-unknown-linux-musl" ;; \
+    *) export TARGET="x86_64-unknown-linux-musl" ;; \
+    esac && \
+    rustup target add $TARGET && \
+    cargo build --release --target $TARGET && \
+    mv target/$TARGET/release/aetherclaw /tmp/aetherclaw
+
+# Runtime stage - scratch for minimal attack surface
+FROM scratch AS runtime
+
+COPY --from=builder /tmp/aetherclaw /aetherclaw
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+# Create non-root user (in scratch, we need to use numeric IDs)
+USER 1000:1000
+
+ENV RUST_LOG=info
+ENV PERSISTENCE_PATH=/data/memory.db
+ENV WORKSPACE_PATH=/workspace
+
+VOLUME ["/data", "/workspace"]
+EXPOSE 8080
+
+ENTRYPOINT ["/aetherclaw"]
+CMD ["gateway"]

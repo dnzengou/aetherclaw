@@ -1,0 +1,22 @@
+# Rust
+aetherclaw/target/
+aetherclaw/Cargo.lock
+
+# Node / frontend
+app/node_modules/
+app/dist/
+app/.env
+app/.env.local
+
+# AetherClaw runtime data
+~/.aetherclaw/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

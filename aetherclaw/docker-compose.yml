@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  aetherclaw:
+    build: .
+    container_name: aetherclaw
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+      - ./workspace:/workspace
+    environment:
+      - RUST_LOG=info
+      - PERSISTENCE_PATH=/data/memory.db
+      - WORKSPACE_PATH=/workspace
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 16M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Optional: Vector database enhancement
+  qdrant:
+    image: qdrant/qdrant:latest
+    volumes:
+      - ./qdrant_storage:/qdrant/storage
+    ports:
+      - "6333:6333"
+    profiles: ["enterprise"]

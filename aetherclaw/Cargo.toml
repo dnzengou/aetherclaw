@@ -1,0 +1,62 @@
+[package]
+name = "aetherclaw"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+overflow-checks = false
+
+[dependencies]
+# Core async runtime
+tokio = { version = "1.44", features = ["full", "rt-multi-thread"] }
+tokio-cron-scheduler = "0.13"
+tokio-util = "0.7"
+futures = "0.3"
+
+# Web server & API
+axum = { version = "0.8", features = ["json", "ws"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["fs", "cors", "trace"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Database & Vector search
+rusqlite = { version = "0.32", features = ["bundled", "serde_json"] }
+
+# LLM Integration
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+# Telegram & Channels
+teloxide = { version = "0.13", features = ["macros", "webhooks"] }
+
+# Security Sandbox
+cap-std = "3.0"
+
+# TUI
+ratatui = "0.29"
+crossterm = "0.28"
+
+# Utilities
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+chrono = "0.4"
+uuid = { version = "1.11", features = ["v4"] }
+anyhow = "1.0"
+thiserror = "1.0"
+dashmap = "6.1"
+notify = "7.0"
+dirs = "5.0"
+sysinfo = { version = "0.33", default-features = false, features = ["system"] }
+
+[dev-dependencies]
+tokio-test = "0.4"
+tempfile = "3.14"
