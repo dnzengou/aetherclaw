@@ -1,13 +1,12 @@
-use axum::{routing::get, Router};
-use serde_json::json;
+use axum::{routing::get, Json, Router};
 use std::net::SocketAddr;
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 
 pub async fn serve(config: crate::config::GatewayConfig, cancel: CancellationToken) -> anyhow::Result<()> {
     let app = Router::new()
-        .route("/health", get(|| async { json!({"status": "ok"}) }))
-        .route("/ready", get(|| async { json!({"status": "ready"}) }));
+        .route("/health", get(|| async { Json(serde_json::json!({"status": "ok"})) }))
+        .route("/ready", get(|| async { Json(serde_json::json!({"status": "ready"})) }));
 
     let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
     info!("Health server listening on {}", addr);

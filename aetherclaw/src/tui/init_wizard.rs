@@ -1,4 +1,4 @@
-use crate::config::{Config, ChannelsConfig, LlmConfig, SecurityConfig, GatewayConfig, HeartbeatConfig};
+use crate::config::Config;
 use anyhow::Result;
 use ratatui::{
     backend::CrosstermBackend,
@@ -9,8 +9,8 @@ use ratatui::{
     },
     layout::{Constraint, Direction, Layout, Alignment},
     style::{Color, Modifier, Style},
-    text::{Line, Span, Text},
-    widgets::{Block, Borders, Paragraph, Clear as ClearWidget, List, ListItem},
+    text::{Line, Text},
+    widgets::{Block, Borders, Paragraph, List},
     Terminal,
 };
 use std::io;

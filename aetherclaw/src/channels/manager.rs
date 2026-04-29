@@ -27,7 +27,7 @@ pub mod telegram {
     use teloxide::prelude::*;
     use teloxide::types::ParseMode;
 
-    pub async fn run(config: super::super::config::telegram::TelegramConfig, bus_tx: mpsc::Sender<InboundMessage>, cancel: CancellationToken) {
+    pub async fn run(config: crate::config::telegram::TelegramConfig, bus_tx: mpsc::Sender<InboundMessage>, _cancel: CancellationToken) {
         info!("Starting Telegram channel...");
 
         let bot = Bot::new(&config.token);

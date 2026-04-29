@@ -8,7 +8,6 @@ mod agent;
 mod bus;
 mod channels;
 mod config;
-mod health;
 mod heartbeat;
 mod llm;
 mod tools;
@@ -58,18 +57,7 @@ async fn main() -> Result<()> {
 
     let mut handles = vec![];
 
-    // 1. Health server
-    handles.push(tokio::spawn({
-        let token = cancellation_token.clone();
-        let cfg = config.gateway.clone();
-        async move {
-            if let Err(e) = health::serve(cfg, token).await {
-                warn!("Health server error: {}", e);
-            }
-        }
-    }));
-
-    // 2. Web dashboard
+    // 1. Web dashboard
     handles.push(tokio::spawn({
         let token = cancellation_token.clone();
         let cfg = config.clone();
