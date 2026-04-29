@@ -55,6 +55,7 @@ thiserror = "1.0"
 dashmap = "6.1"
 notify = "7.0"
 dirs = "5.0"
+atty = "0.2"
 sysinfo = { version = "0.33", default-features = false, features = ["system"] }
 
 [dev-dependencies]

@@ -129,7 +129,7 @@ function useWebSocket(sessionKeyRef: React.MutableRefObject<string>) {
 
   const subscribe = useCallback((fn: (data: unknown) => void) => {
     listenersRef.current.add(fn);
-    return () => listenersRef.current.delete(fn);
+    return () => { listenersRef.current.delete(fn); };
   }, []);
 
   return { status, send, subscribe };
@@ -393,12 +393,12 @@ function App() {
           <nav className="p-3 space-y-1">
             {(
               [
-                { id: 'chat', icon: MessageSquare, label: 'Chat' },
-                { id: 'agents', icon: Cpu, label: 'Agents', badge: agents.length },
-                { id: 'deploy', icon: GitBranch, label: 'Deployments' },
-                { id: 'security', icon: Shield, label: 'Security' },
-                { id: 'metrics', icon: BarChart3, label: 'Metrics' },
-              ] as const
+                { id: 'chat' as const, icon: MessageSquare, label: 'Chat', badge: undefined as number | undefined },
+                { id: 'agents' as const, icon: Cpu, label: 'Agents', badge: agents.length as number | undefined },
+                { id: 'deploy' as const, icon: GitBranch, label: 'Deployments', badge: undefined as number | undefined },
+                { id: 'security' as const, icon: Shield, label: 'Security', badge: undefined as number | undefined },
+                { id: 'metrics' as const, icon: BarChart3, label: 'Metrics', badge: undefined as number | undefined },
+              ]
             ).map(({ id, icon: Icon, label, badge }) => (
               <button
                 key={id}

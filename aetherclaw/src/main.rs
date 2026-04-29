@@ -31,6 +31,12 @@ async fn main() -> Result<()> {
 
     let config = if Config::exists() {
         Config::load()?
+    } else if std::env::var("NO_TUI").is_ok() || !atty::is(atty::Stream::Stdout) {
+        // Headless (Docker, CI, systemd): build config from environment variables
+        info!("No config found — building from environment variables (headless mode)");
+        let cfg = build_config_from_env();
+        cfg.save()?;
+        cfg
     } else {
         info!("First run detected. Launching TUI wizard...");
         tui::init_wizard::run().await?
@@ -150,4 +156,82 @@ async fn main() -> Result<()> {
 
     info!("AetherClaw shutdown complete.");
     Ok(())
+}
+
+fn build_config_from_env() -> Config {
+    use config::{telegram, discord, ModelEntry};
+
+    let workspace = std::env::var("WORKSPACE_PATH")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| std::path::PathBuf::from("/workspace"));
+
+    let port: u16 = std::env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(8080);
+
+    let mut cfg = Config {
+        workspace,
+        gateway: config::GatewayConfig {
+            host: std::env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string()),
+            port,
+            dashboard_enabled: true,
+        },
+        channels: config::ChannelsConfig {
+            telegram: None,
+            discord: None,
+        },
+        llm: config::LlmConfig {
+            local_models_path: std::path::PathBuf::from("/data/models"),
+            default_local_model: "phi-2-q4.gguf".to_string(),
+            cloud_fallback: None,
+            model_list: vec![],
+        },
+        heartbeat: config::HeartbeatConfig {
+            enabled: true,
+            interval: 30,
+        },
+        security: config::SecurityConfig {
+            restrict_to_workspace: true,
+            allow_exec: true,
+        },
+    };
+
+    if let Ok(token) = std::env::var("TELEGRAM_BOT_TOKEN") {
+        cfg.channels.telegram = Some(telegram::TelegramConfig {
+            enabled: true,
+            token,
+            allow_from: vec![],
+            proxy: None,
+        });
+    }
+
+    if let Ok(token) = std::env::var("DISCORD_BOT_TOKEN") {
+        cfg.channels.discord = Some(discord::DiscordConfig {
+            enabled: true,
+            token,
+            allow_from: vec![],
+        });
+    }
+
+    if let Ok(key) = std::env::var("OPENAI_API_KEY") {
+        cfg.llm.model_list.push(ModelEntry {
+            model_name: std::env::var("OPENAI_MODEL")
+                .unwrap_or_else(|_| "gpt-4o-mini".to_string()),
+            model: "openai/gpt-4o-mini".to_string(),
+            api_key: Some(key),
+            api_base: std::env::var("OPENAI_API_BASE").ok(),
+        });
+    }
+
+    if let Ok(key) = std::env::var("ANTHROPIC_API_KEY") {
+        cfg.llm.model_list.push(ModelEntry {
+            model_name: "claude-3-haiku".to_string(),
+            model: "anthropic/claude-3-haiku-20240307".to_string(),
+            api_key: Some(key),
+            api_base: None,
+        });
+    }
+
+    cfg
 }

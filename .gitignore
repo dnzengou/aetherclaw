@@ -1,6 +1,6 @@
 # Rust
 aetherclaw/target/
-aetherclaw/Cargo.lock
+# Cargo.lock is intentionally committed for binary crates (reproducible builds)
 
 # Node / frontend
 app/node_modules/
