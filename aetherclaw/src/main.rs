@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
     let cancellation_token = CancellationToken::new();
 
     let mut bus = bus::MessageBus::new(256);
-    let db = Arc::new(tokio::sync::RwLock::new(
+    let db = Arc::new(tokio::sync::Mutex::new(
         tools::persistence::Database::new(&config.workspace.join("memory.db"))?,
     ));
 

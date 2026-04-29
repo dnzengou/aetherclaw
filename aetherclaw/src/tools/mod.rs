@@ -1,4 +1,4 @@
-use anyhow::Result;
+use cap_std::ambient_authority;
 use cap_std::fs::Dir;
 use std::path::Path;
 use std::sync::Arc;
@@ -23,7 +23,7 @@ impl Clone for ToolKit {
 impl ToolKit {
     pub fn new(workspace: &Path, restricted: bool) -> Self {
         let sandbox = if restricted {
-            Arc::new(Dir::open_ambient_dir(workspace).ok())
+            Arc::new(Dir::open_ambient_dir(workspace, ambient_authority()).ok())
         } else {
             Arc::new(None)
         };
@@ -35,6 +35,7 @@ impl ToolKit {
         }
     }
 
+    #[allow(dead_code)]
     pub fn list_tools(&self) -> Vec<&str> {
         vec!["read_file", "write_file", "list_dir", "exec", "web_search"]
     }
@@ -254,6 +255,7 @@ pub mod persistence {
             Ok(rows.filter_map(|r| r.ok()).collect())
         }
 
+        #[allow(dead_code)]
         pub fn track_usage(&self, session_id: &str, model: &str, tokens: i64) -> Result<()> {
             let id = uuid::Uuid::new_v4().to_string();
             self.conn.execute(
@@ -292,6 +294,7 @@ pub mod migration {
     use anyhow::Result;
     use crate::config::Config;
 
+    #[allow(dead_code)]
     pub async fn migrate() -> Result<Config> {
         tracing::info!("Migrating from PicoClaw...");
         let config = Config::default();

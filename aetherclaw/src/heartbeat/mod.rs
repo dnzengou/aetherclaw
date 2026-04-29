@@ -86,7 +86,7 @@ pub mod service {
 
             // Description line
             if trimmed.starts_with("- desc:") || trimmed.starts_with("- description:") {
-                let desc = trimmed.splitn(2, ':').nth(1).unwrap_or("").trim().to_string();
+                let desc = trimmed.split_once(':').map(|(_, v)| v).unwrap_or("").trim().to_string();
                 if let Some(t) = current_task.as_mut() {
                     t.description = desc;
                 }
@@ -95,7 +95,7 @@ pub mod service {
 
             // Shell command
             if trimmed.starts_with("- cmd:") || trimmed.starts_with("- command:") {
-                let cmd = trimmed.splitn(2, ':').nth(1).unwrap_or("").trim().to_string();
+                let cmd = trimmed.split_once(':').map(|(_, v)| v).unwrap_or("").trim().to_string();
                 if let Some(t) = current_task.as_mut() {
                     t.command = Some(cmd);
                 }

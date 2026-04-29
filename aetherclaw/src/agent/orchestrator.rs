@@ -16,7 +16,7 @@ pub struct MultiAgentOrchestrator {
     bus_tx: mpsc::Sender<OutboundMessage>,
     workspace: PathBuf,
     cot_trace_dir: PathBuf,
-    db: Arc<tokio::sync::RwLock<crate::tools::persistence::Database>>,
+    db: Arc<tokio::sync::Mutex<crate::tools::persistence::Database>>,
 }
 
 impl MultiAgentOrchestrator {
@@ -25,7 +25,7 @@ impl MultiAgentOrchestrator {
         tools: ToolKit,
         bus_tx: mpsc::Sender<OutboundMessage>,
         workspace: &std::path::Path,
-        db: Arc<tokio::sync::RwLock<crate::tools::persistence::Database>>,
+        db: Arc<tokio::sync::Mutex<crate::tools::persistence::Database>>,
     ) -> Self {
         Self {
             llm,
@@ -43,7 +43,7 @@ impl MultiAgentOrchestrator {
 
         // Persist user message
         {
-            let db = self.db.read().await;
+            let db = self.db.lock().await;
             let _ = db.ensure_session(&msg.session_key, &msg.channel, &msg.sender);
             let _ = db.save_message(&msg.session_key, "user", &msg.content);
         }
@@ -68,7 +68,7 @@ impl MultiAgentOrchestrator {
 
         // Persist assistant response
         {
-            let db = self.db.read().await;
+            let db = self.db.lock().await;
             let _ = db.save_message(&msg.session_key, "assistant", &response);
         }
 
@@ -100,7 +100,7 @@ impl MultiAgentOrchestrator {
         match build_result {
             Err(e) => {
                 cot.add_observation(format!("Build failed: {}", e));
-                return format!("Build failed: {}", e);
+                format!("Build failed: {}", e)
             }
             Ok(artifact) => {
                 cot.add_observation(format!("Build successful: {}", artifact));
@@ -199,7 +199,7 @@ impl MultiAgentOrchestrator {
     ) -> String {
         // Load recent conversation history for context
         let history = {
-            let db = self.db.read().await;
+            let db = self.db.lock().await;
             db.get_history(&msg.session_key, 20).unwrap_or_default()
         };
 
@@ -280,7 +280,7 @@ impl MultiAgentOrchestrator {
         let _ = tokio::fs::write(path, trace).await;
 
         // Also persist to DB
-        let db = self.db.read().await;
+        let db = self.db.lock().await;
         let _ = db.save_cot_trace(session_id, trace);
     }
 }

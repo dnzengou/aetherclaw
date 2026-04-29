@@ -23,7 +23,7 @@ impl AgentLoop {
         tools: ToolKit,
         bus_tx: mpsc::Sender<OutboundMessage>,
         workspace: &std::path::Path,
-        db: Arc<tokio::sync::RwLock<crate::tools::persistence::Database>>,
+        db: Arc<tokio::sync::Mutex<crate::tools::persistence::Database>>,
     ) -> Self {
         let orchestrator = MultiAgentOrchestrator::new(llm, tools.clone(), bus_tx, workspace, db);
         Self {
@@ -32,7 +32,7 @@ impl AgentLoop {
         }
     }
 
-    pub async fn run(mut self, inbound_rx: &mut mpsc::Receiver<InboundMessage>, cancel: CancellationToken) {
+    pub async fn run(self, inbound_rx: &mut mpsc::Receiver<InboundMessage>, cancel: CancellationToken) {
         info!("AgentLoop started (Multi-Agent CoT/ReAct)");
 
         loop {

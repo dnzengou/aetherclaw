@@ -23,7 +23,7 @@ pub type WsClients = Arc<DashMap<String, mpsc::UnboundedSender<String>>>;
 pub async fn serve(
     config: Config,
     bus_tx: mpsc::Sender<InboundMessage>,
-    db: Arc<tokio::sync::RwLock<crate::tools::persistence::Database>>,
+    db: Arc<tokio::sync::Mutex<crate::tools::persistence::Database>>,
     ws_clients: WsClients,
     cancel: CancellationToken,
 ) -> anyhow::Result<()> {
@@ -84,7 +84,7 @@ pub async fn serve(
 #[derive(Clone)]
 struct AppState {
     bus_tx: mpsc::Sender<InboundMessage>,
-    db: Arc<tokio::sync::RwLock<crate::tools::persistence::Database>>,
+    db: Arc<tokio::sync::Mutex<crate::tools::persistence::Database>>,
     ws_clients: WsClients,
     start_time: std::time::Instant,
 }
@@ -126,7 +126,7 @@ async fn status_handler(State(state): State<AppState>) -> impl IntoResponse {
     let uptime = state.start_time.elapsed().as_secs();
 
     let (total_requests, total_tokens) = {
-        let db = state.db.read().await;
+        let db = state.db.lock().await;
         db.get_total_usage().unwrap_or((0, 0))
     };
 
@@ -149,7 +149,7 @@ async fn history_handler(
         return Json(serde_json::json!({ "messages": [] }));
     }
     let history = {
-        let db = state.db.read().await;
+        let db = state.db.lock().await;
         db.get_history(&session_key, 100).unwrap_or_default()
     };
     let messages: Vec<_> = history

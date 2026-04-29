@@ -108,6 +108,7 @@ impl ChainOfThought {
         serde_json::to_string_pretty(&self.reasoning_chain).unwrap_or_default()
     }
     
+    #[allow(dead_code)]
     pub fn get_chain(&self) -> &VecDeque<ThoughtStep> {
         &self.reasoning_chain
     }

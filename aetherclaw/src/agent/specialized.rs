@@ -1,9 +1,10 @@
 use crate::tools::ToolKit;
 use std::process::Stdio;
 use tokio::process::Command;
-use tracing::{info, error};
+use tracing::info;
 
 pub struct BuilderAgent {
+    #[allow(dead_code)]
     tools: ToolKit,
     workspace: std::path::PathBuf,
 }
@@ -33,7 +34,7 @@ impl BuilderAgent {
 
         // Execute cargo build
         let output = Command::new("cargo")
-            .args(&[
+            .args([
                 "build",
                 "--profile", profile,
                 "--target", target,
@@ -53,7 +54,7 @@ impl BuilderAgent {
 
         // Run tests
         let test_output = Command::new("cargo")
-            .args(&["test", "--release", "--", "--nocapture"])
+            .args(["test", "--release", "--", "--nocapture"])
             .current_dir(&self.workspace)
             .output()
             .await
@@ -87,6 +88,7 @@ impl BuilderAgent {
 }
 
 pub struct SecurityAgent {
+    #[allow(dead_code)]
     tools: ToolKit,
 }
 
@@ -118,7 +120,7 @@ impl SecurityAgent {
 
         // Check dependencies with cargo-audit (if available)
         let audit_output = Command::new("cargo")
-            .args(&["audit", "--json"])
+            .args(["audit", "--json"])
             .current_dir(std::path::Path::new(target).parent().unwrap_or(std::path::Path::new(".")))
             .output()
             .await;
@@ -140,6 +142,7 @@ impl SecurityAgent {
 }
 
 pub struct DeployerAgent {
+    #[allow(dead_code)]
     tools: ToolKit,
     registry: String,
 }
@@ -156,7 +159,7 @@ impl DeployerAgent {
         let tag = format!("{}/aetherclaw:{}", self.registry, version);
         
         let build_output = Command::new("docker")
-            .args(&[
+            .args([
                 "build", 
                 "-t", &tag,
                 "--build-arg", &format!("BINARY={}", artifact),
@@ -172,7 +175,7 @@ impl DeployerAgent {
 
         // Push to registry
         let push_output = Command::new("docker")
-            .args(&["push", &tag])
+            .args(["push", &tag])
             .output()
             .await
             .map_err(|e| format!("Docker push failed: {}", e))?;
@@ -183,7 +186,7 @@ impl DeployerAgent {
 
         // Update docker-compose deployment
         let deploy_output = Command::new("docker-compose")
-            .args(&["-f", "docker-compose.prod.yml", "up", "-d", "--no-deps", "aetherclaw"])
+            .args(["-f", "docker-compose.prod.yml", "up", "-d", "--no-deps", "aetherclaw"])
             .output()
             .await
             .map_err(|e| format!("Deployment failed: {}", e))?;
@@ -200,6 +203,7 @@ impl DeployerAgent {
 }
 
 pub struct MonitorAgent {
+    #[allow(dead_code)]
     health_endpoint: String,
 }
 

@@ -22,9 +22,9 @@ pub async fn run() -> Result<Config> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let mut config = Config::default();
-    let mut current_step = 0;
-    let steps = vec!["Welcome", "Hardware", "LLM Setup", "Channels", "Security", "Complete"];
+    let config = Config::default();
+    let mut current_step: usize = 0;
+    let steps = ["Welcome", "Hardware", "LLM Setup", "Channels", "Security", "Complete"];
 
     loop {
         terminal.draw(|f| {
@@ -64,17 +64,15 @@ pub async fn run() -> Result<Config> {
             match key.code {
                 KeyCode::Char('q') => break,
                 KeyCode::Right | KeyCode::Enter => {
-                    if current_step < steps.len() - 1 {
+                    if current_step + 1 < steps.len() {
                         current_step += 1;
                     } else {
                         config.save()?;
                         break;
                     }
                 }
-                KeyCode::Left => {
-                    if current_step > 0 {
-                        current_step -= 1;
-                    }
+                KeyCode::Left if current_step > 0 => {
+                    current_step -= 1;
                 }
                 _ => {}
             }

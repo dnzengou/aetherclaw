@@ -1,6 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
@@ -119,6 +119,7 @@ impl Config {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub async fn migrate_from_picoclaw() -> Result<Self> {
         // Migration logic from old PicoClaw JSON config
         tools::migration::migrate().await
@@ -154,6 +155,7 @@ pub mod tools {
         use anyhow::Result;
         use crate::config::Config;
 
+        #[allow(dead_code)]
         pub async fn migrate() -> Result<Config> {
             tracing::info!("Migrating from PicoClaw...");
             let config = Config::default();

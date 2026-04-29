@@ -5,6 +5,7 @@ use serde_json::Value;
 pub struct ModelRouter {
     local_engine: Option<LocalEngine>,
     cloud_clients: Vec<CloudClient>,
+    #[allow(dead_code)]
     pub default_model: String,
 }
 
@@ -52,10 +53,12 @@ impl ModelRouter {
         })
     }
 
+    #[allow(dead_code)]
     pub fn is_local_available(&self) -> bool {
         self.local_engine.is_some()
     }
 
+    #[allow(dead_code)]
     pub fn available_models(&self) -> Vec<String> {
         let mut models = vec![];
         if let Some(local) = &self.local_engine {
@@ -67,6 +70,7 @@ impl ModelRouter {
         models
     }
 
+    #[allow(dead_code)]
     pub async fn infer(&self, prompt: &str, context: Option<&str>) -> Result<String> {
         if let Some(local) = &self.local_engine {
             match self.local_infer(local, prompt, context).await {
@@ -102,13 +106,14 @@ impl ModelRouter {
         }
     }
 
-    async fn local_infer(&self, engine: &LocalEngine, prompt: &str, _context: Option<&str>) -> Result<String> {
+    async fn local_infer(&self, engine: &LocalEngine, _prompt: &str, _context: Option<&str>) -> Result<String> {
         // llama-cpp-rs integration placeholder — loads model on first call
         // Feature-gated: enable with `--features local-inference` when llama-cpp-rs is configured
         tracing::info!("Local model path: {} (integration pending)", engine.model_path);
         anyhow::bail!("Local inference not yet compiled in. Add llama-cpp-rs feature.")
     }
 
+    #[allow(dead_code)]
     async fn cloud_infer(&self, client: &CloudClient, prompt: &str, context: Option<&str>) -> Result<String> {
         let messages = build_messages(context, &[], prompt);
         self.do_completion(client, messages).await
