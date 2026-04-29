@@ -11,9 +11,9 @@ RUN npm run build
 # ─────────────────────────────────────────────
 # Stage 2: Build Rust backend
 # ─────────────────────────────────────────────
-FROM rust:1.82-slim AS rust-builder
+FROM rust:1-slim AS rust-builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    pkg-config libssl-dev ca-certificates \
+    pkg-config libssl-dev ca-certificates build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
