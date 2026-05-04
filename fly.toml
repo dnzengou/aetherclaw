@@ -39,4 +39,4 @@ primary_region = "sjc"
 [[mounts]]
   source = "aetherclaw_config"
   destination = "/root/.aetherclaw"
-  initial_size = "100mb"
+  initial_size = "1gb"
