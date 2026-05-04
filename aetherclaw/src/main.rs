@@ -202,11 +202,27 @@ fn build_config_from_env() -> Config {
         });
     }
 
-    if let Ok(key) = std::env::var("OPENAI_API_KEY") {
+    // DeepSeek first — OpenAI-compatible, cheapest, set as default
+    if let Ok(key) = std::env::var("DEEPSEEK_API_KEY") {
+        let model_name = std::env::var("OPENAI_MODEL")
+            .unwrap_or_else(|_| "deepseek-chat".to_string());
         cfg.llm.model_list.push(ModelEntry {
-            model_name: std::env::var("OPENAI_MODEL")
-                .unwrap_or_else(|_| "gpt-4o-mini".to_string()),
-            model: "openai/gpt-4o-mini".to_string(),
+            model_name: model_name.clone(),
+            model: model_name,
+            api_key: Some(key),
+            api_base: Some(
+                std::env::var("DEEPSEEK_API_BASE")
+                    .unwrap_or_else(|_| "https://api.deepseek.com/v1".to_string()),
+            ),
+        });
+    }
+
+    if let Ok(key) = std::env::var("OPENAI_API_KEY") {
+        let model = std::env::var("OPENAI_MODEL")
+            .unwrap_or_else(|_| "gpt-4o-mini".to_string());
+        cfg.llm.model_list.push(ModelEntry {
+            model_name: model.clone(),
+            model,
             api_key: Some(key),
             api_base: std::env::var("OPENAI_API_BASE").ok(),
         });
@@ -214,10 +230,10 @@ fn build_config_from_env() -> Config {
 
     if let Ok(key) = std::env::var("ANTHROPIC_API_KEY") {
         cfg.llm.model_list.push(ModelEntry {
-            model_name: "claude-3-haiku".to_string(),
-            model: "anthropic/claude-3-haiku-20240307".to_string(),
+            model_name: "claude-3-5-haiku".to_string(),
+            model: "claude-3-5-haiku-20241022".to_string(),
             api_key: Some(key),
-            api_base: None,
+            api_base: Some("https://api.anthropic.com/v1".to_string()),
         });
     }
 
