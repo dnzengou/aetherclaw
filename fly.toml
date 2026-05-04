@@ -8,6 +8,8 @@ primary_region = "sjc"
   RUST_LOG = "info"
   STATIC_DIR = "/app/static"
   PORT = "8080"
+  WORKSPACE_PATH = "/data/workspace"
+  HOME = "/data"
 
 [http_service]
   internal_port = 8080
@@ -29,14 +31,4 @@ primary_region = "sjc"
 [[mounts]]
   source = "aetherclaw_data"
   destination = "/data"
-  initial_size = "1gb"
-
-[[mounts]]
-  source = "aetherclaw_workspace"
-  destination = "/workspace"
-  initial_size = "1gb"
-
-[[mounts]]
-  source = "aetherclaw_config"
-  destination = "/root/.aetherclaw"
   initial_size = "1gb"
