@@ -1,0 +1,28 @@
+# Node
+app/node_modules/
+app/.next/
+
+# Rust build artifacts
+aetherclaw/target/
+
+# Git
+.git/
+.github/
+
+# Editor / OS
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+
+# Secrets / env
+.env
+.env.*
+*.pem
+*.key
+
+# Logs
+*.log
+
+# Claude session data
+.claude/

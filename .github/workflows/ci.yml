@@ -136,4 +136,4 @@ jobs:
 
       - name: Deploy
         if: env.FLY_API_TOKEN != ''
-        run: flyctl deploy --remote-only --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        run: flyctl deploy --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest --app aetherclaw --ha=false
